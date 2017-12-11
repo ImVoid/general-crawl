@@ -1,6 +1,5 @@
 # -*-coding:utf-8-*-
 import urllib2
-
 # 下载页面:
 # 错误检测
 # 服务端错误重试（默认两次）
@@ -24,5 +23,3 @@ def download(url, user_agent='wswp', num_retries=2):
             if hasattr(e, 'code') and 500 <= e.code < 600:
                 return download(url, num_retries-1)
     return html
-
-print download("http://www.baidu.com/")
