@@ -105,5 +105,3 @@ def get_links(html):
     """返回一个页面的所有链接"""
     webpage_regex = re.compile('<a[^>]+href=["\'](.*?)["\']', re.IGNORECASE)
     return webpage_regex.findall(html)
-
-link_crawler('http://example.webscraping.com/', '/(index|view)')
