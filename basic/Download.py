@@ -75,9 +75,10 @@ def crawl_id(url_prefix, max_errors=5, num_errors=0):
 # 链接爬虫
 # 过滤重复链接
 # 限定爬取深度，首页深度为1
+# 提供回调函数
 import re
 import urlparse
-def link_crawler(seed_url, link_regex, max_depth=2):
+def link_crawler(seed_url, link_regex, max_depth=2, scrae_callback=None):
     """从种子链接seed_url，爬取所有匹配正则的url"""
     crawl_queue = [seed_url]
     # 唯一的保存相同的链接&深度
@@ -86,6 +87,10 @@ def link_crawler(seed_url, link_regex, max_depth=2):
     while crawl_queue:
         url = crawl_queue.pop()
         html = download(url)
+
+        # 调用回调函数
+        if scrae_callback:
+            scrae_callback(url, html)
 
         # 获取现页面的深度
         depth = seen[url]
@@ -105,3 +110,12 @@ def get_links(html):
     """返回一个页面的所有链接"""
     webpage_regex = re.compile('<a[^>]+href=["\'](.*?)["\']', re.IGNORECASE)
     return webpage_regex.findall(html)
+
+# 回调函数
+import lxml.html
+def scrae_call(url, html):
+    FIELLDS = ['area']
+    if re.search('/view', url):
+        tree = lxml.html.fromstring(html)
+        row = [tree.cssselect('tr#places_%s__row > td.w2p_fw' % field)[0].text_content() for field in FIELLDS]
+        print url, row
