@@ -15,12 +15,15 @@ class DiskCache:
     def url_to_path(self, url):
         # 分割url的不同部分
         components = urlparse.urlparse(url)
-        # 为空path & “/”结尾的url添加index.html后缀
+        # 为空path & “/”结尾的url添加index.data后缀
+        # 为所有文件命添加后缀.data,避免出现index文件名和index文件夹在同一目录
         path = components.path
         if not path:
-            path = '/index.html'
+            path = '/index.data'
         elif path.endswith('/'):
-            path += 'index.html'
+            path += 'index.data'
+        else:
+            path += '.data'
         filename = components.netloc + path + components.query
         # 替换文件系统不合法字符
         filename = re.sub('[^/0-9a-zA-Z\-.,;]', '_', filename)
@@ -49,5 +52,3 @@ class DiskCache:
             os.makedirs(folder)
         with open(path, 'wb') as fp:
             fp.write(pickle.dumps(result))
-
-print DiskCache().url_to_path('http://example.webscraping.com/index?adb=a')
