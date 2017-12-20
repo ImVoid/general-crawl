@@ -75,10 +75,11 @@ def crawl_id(url_prefix, max_errors=5, num_errors=0):
 # 链接爬虫
 # 过滤重复链接
 # 限定爬取深度，首页深度为1
+# 限速
 # 提供回调函数
 import re
 import urlparse
-def link_crawler(seed_url, link_regex, max_depth=2, scrae_callback=None):
+def link_crawler(seed_url, link_regex, max_depth=2, throttle=None, scrae_callback=None):
     """从种子链接seed_url，爬取所有匹配正则的url"""
     crawl_queue = [seed_url]
     # 唯一的保存相同的链接&深度
@@ -86,7 +87,7 @@ def link_crawler(seed_url, link_regex, max_depth=2, scrae_callback=None):
     # 下载每个html页面
     while crawl_queue:
         url = crawl_queue.pop()
-        html = download(url)
+        html = download(url, throttle=throttle)
 
         # 调用回调函数
         if scrae_callback:
@@ -119,3 +120,7 @@ def scrae_call(url, html):
         tree = lxml.html.fromstring(html)
         row = [tree.cssselect('tr#places_%s__row > td.w2p_fw' % field)[0].text_content() for field in FIELLDS]
         print url, row
+
+import Callback
+link_crawler('http://example.webscraping.com/places/default/index', '/(index|view)',
+             throttle=Throttle(1), max_depth=-1, scrae_callback=Callback.ScraeCallback())
