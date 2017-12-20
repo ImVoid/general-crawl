@@ -16,15 +16,13 @@ class DiskCache:
         # 分割url的不同部分
         components = urlparse.urlparse(url)
         # 为空path & “/”结尾的url添加index.data后缀
-        # 为所有文件命添加后缀.data,避免出现index文件名和index文件夹在同一目录
         path = components.path
         if not path:
-            path = '/index.data'
+            path = '/index'
         elif path.endswith('/'):
-            path += 'index.data'
-        else:
-            path += '.data'
-        filename = components.netloc + path + components.query
+            path += 'index'
+        # 为所有文件命添加后缀.data,避免出现index文件名和index文件夹在同一目录
+        filename = components.netloc + path + components.query + '.data'
         # 替换文件系统不合法字符
         filename = re.sub('[^/0-9a-zA-Z\-.,;]', '_', filename)
         # 每个文件夹名长度不能超出255
@@ -36,6 +34,8 @@ class DiskCache:
     def __getitem__(self, url):
         """以url为线索从磁盘获取数据"""
         path = self.url_to_path(url)
+        if path == 'cache\\example.webscraping.com/places/default/user/login.data_next_/places/default/index':
+            i = 0
         if os.path.exists(path):
             with open(path, 'rb') as fp:
                 return pickle.load(fp)
