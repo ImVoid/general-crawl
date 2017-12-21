@@ -106,3 +106,4 @@ class Throttle:
                 time.sleep(sleep_secs)
         # 更新该域名最后访问时间
         self.domains[domain] = datetime.datetime.now()
+

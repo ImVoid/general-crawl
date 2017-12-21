@@ -2,14 +2,20 @@
 
 import re
 import os
+import zlib
 import urlparse
 import pickle
+from datetime import datetime, timedelta
 
 class DiskCache:
-    """利用文件系统缓存
+    """利用文件系统缓存,并设置过期时间为30天
+        此缓存可能存在重复key，但value不同的情况
+        故不应在生产环境使用
+        如有必要请改造key为hash
     """
-    def __init__(self, cache_dir='cache'):
+    def __init__(self, cache_dir='cache', expires=timedelta(days=30)):
         self.cache_dir = cache_dir
+        self.expires = expires
 
     # 将url映射为文件路径
     def url_to_path(self, url):
@@ -34,11 +40,14 @@ class DiskCache:
     def __getitem__(self, url):
         """以url为线索从磁盘获取数据"""
         path = self.url_to_path(url)
-        if path == 'cache\\example.webscraping.com/places/default/user/login.data_next_/places/default/index':
-            i = 0
         if os.path.exists(path):
             with open(path, 'rb') as fp:
-                return pickle.load(fp)
+                # 解压返回
+                result, timestamp = pickle.loads(zlib.decompress(fp.read()))
+                # 过期？
+                if self.has_expired(timestamp):
+                    raise KeyError(url + ' 数据过期')
+                return result
         # 不存在文件则抛出异常
         else:
             raise KeyError(url + ' 文件不存在')
@@ -51,4 +60,12 @@ class DiskCache:
         if not os.path.exists(folder):
             os.makedirs(folder)
         with open(path, 'wb') as fp:
-            fp.write(pickle.dumps(result))
+            # 记录时间戳
+            timestamp = datetime.utcnow()
+            data = pickle.dumps((result, timestamp))
+            # 压缩存储
+            fp.write(zlib.compress(data))
+
+    # 判断时间是否过期
+    def has_expired(self, timestamp):
+        return datetime.utcnow() > timestamp + self.expires

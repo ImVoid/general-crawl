@@ -44,10 +44,5 @@ def get_links(html):
     webpage_regex = re.compile('<a[^>]+href=["\'](.*?)["\']', re.IGNORECASE)
     return webpage_regex.findall(html)
 
-filename = 'http://example.webscraping.com/index/'
-url = 'http://example.webscraping.com/index?adb=a'
-
-import urlparse
-import os
-
-print urlparse.urlsplit(url)
+from disk_cache import DiskCache
+link_crawler('http://example.webscraping.com/', '/(index|view)', cache=DiskCache())
