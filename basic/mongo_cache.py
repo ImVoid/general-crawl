@@ -28,10 +28,3 @@ class MongoCache:
     def __setitem__(self, url, result):
         record = {'result': result, 'timestamp': datetime.utcnow()}
         self.db.webpage.update({'_id': url}, {'$set': record}, upsert=True)
-
-cache = MongoCache(expires=timedelta(seconds=1))
-result = {'html':'h'}
-cache['www.baidu.com'] = result
-import time
-time.sleep(60)
-print cache['www.baidu.com']
