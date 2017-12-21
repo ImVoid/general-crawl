@@ -8,6 +8,7 @@ import pickle
 from datetime import datetime, timedelta
 
 class DiskCache:
+    # TODO 待改善存在的问题 p49
     """利用文件系统缓存,并设置过期时间为30天
         此缓存可能存在重复key，但value不同的情况
         故不应在生产环境使用
